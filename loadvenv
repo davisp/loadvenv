@@ -1,0 +1,38 @@
+#! /bin/bash
+# loadvenv - Load a virtual environment
+# Based on code from: (a long ass url)
+# http://neuroimaging.scipy.org/site/doc/manual/html/devel/tools/virtualenv-tutor.html
+
+CONFIG=~/.loadvenv.rc
+LVENV_INIT=~/.loadvenv.boot
+PRE_LOAD=~/.loadvenv.pre
+POST_LOAD=~/.loadvenv.post
+ENV_ROOT=~/virtualenv/
+
+if [ -f $CONFIG ]; then
+    source $CONFIG
+fi
+
+if [ $# -ne 1 ]; then
+    echo 'Usage: loadvenv ENV_NAME'
+    exit 1
+fi
+
+VENV_PATH=$ENV_ROOT/$1
+
+if [ ! -e $VENV_PATH ] ; then
+    echo "Failed to find environment:" $VENV_PATH
+    exit 1
+fi
+
+cat - > $LVENV_INIT <<EOF
+if [ -f $PRE_LOAD ]; then
+    source $PRE_LOAD $1
+fi
+source $VENV_PATH/bin/activate
+if [ -f $POST_LOAD ]; then
+    source $POST_LOAD $1
+fi
+EOF
+
+bash --rcfile $LVENV_INIT
